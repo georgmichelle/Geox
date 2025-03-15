@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoX - Fast Simple Programming</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --text: #334155;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 1rem;
+            gap: 1rem;
+            height: calc(100vh - 110px);
+        }
+        
+        .editor-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .output-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .editor-header, .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .tab-container {
+            display: flex;
+            background-color: #e2e8f0;
+            border-top-left-radius: 0.25rem;
+            border-top-right-radius: 0.25rem;
+        }
+        
+        .tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-right: 1px solid #cbd5e1;
+        }
+        
+        .tab.active {
+            background-color: white;
+            font-weight: bold;
+        }
+        
+        .editor, .output {
+            flex: 1;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.25rem;
+            overflow: hidden;
+        }
+        
+        #code-editor {
+            width: 100%;
+            height: 100%;
+            font-family: monospace;
+            font-size: 1rem;
+            padding: 0.5rem;
+            border: none;
+            resize: none;
+            background-color: white;
+        }
+        
+        #output-display {
+            width: 100%;
+            height: 100%;
+            background-color: var(--code-bg);
+            color: #f8fafc;
+            padding: 0.5rem;
+            font-family: monospace;
+            overflow-y: auto;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.25rem;
+            background-color: var(--primary);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: #64748b;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #475569;
+        }
+        
+        footer {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        footer a {
+            color: white;
+            text-decoration: underline;
+        }
+        
+        .problems-panel {
+            display: none;
+            flex-direction: column;
+            width: 300px;
+            background-color: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+        }
+        
+        .problem-item {
+            padding: 0.5rem;
+            cursor: pointer;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .problem-item:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .timer {
+            background-color: #1e293b;
+            color: #4ade80;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+        }
+        
+        .show {
+            display: flex;
+        }
+        
+        #file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">GeoX Programming Language</div>
+        <div class="controls">
+            <button id="btn-problems" class="btn btn-secondary">Problems</button>
+            <button id="btn-open" class="btn btn-secondary">Open File</button>
+            <input type="file" id="file-input" accept=".gx">
+            <button id="btn-save" class="btn btn-secondary">Save File</button>
+        </div>
+    </header>
+    
+    <div class="main-container">
+        <div class="editor-container">
+            <div class="editor-header">
+                <div class="tab-container">
+                    <div class="tab active" data-tab="main.gx">main.gx</div>
+                </div>
+                <button id="btn-run" class="btn">Run Code</button>
+            </div>
+            <div class="editor">
+                <textarea id="code-editor" spellcheck="false" placeholder="Write your GeoX code here..."></textarea>
+            </div>
+        </div>
+        
+        <div class="problems-panel" id="problems-panel">
+            <h3>Practice Problems</h3>
+            <div class="problem-item" data-problem="hello">1. Hello World</div>
+            <div class="problem-item" data-problem="variables">2. Variables and Math</div>
+            <div class="problem-item" data-problem="loop">3. Simple Loop</div>
+            <div class="problem-item" data-problem="conditional">4. Conditional Logic</div>
+            <div class="problem-item" data-problem="function">5. Functions</div>
+        </div>
+        
+        <div class="output-container">
+            <div class="output-header">
+                <h3>Output</h3>
+                <div class="timer" id="runtime">Runtime: 0ms</div>
+            </div>
+            <div class="output">
+                <div id="output-display">// GeoX output will appear here</div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div>Made by Georg Michelle</div>
+        <div><a href="https://georgmichelle.portfolio" target="_blank">Visit my portfolio</a></div>
+        <div>GeoX v1.0.0</div>
+    </footer>
+    
+    <script>
+        // GeoX Compiler and Interpreter
+        class GeoXCompiler {
+            constructor() {
+                this.variables = new Map();
+                this.functions = new Map();
+                this.output = [];
+                this.startTime = 0;
+                this.endTime = 0;
+            }
+            
+            reset() {
+                this.variables.clear();
+                this.functions.clear();
+                this.output = [];
+            }
+            
+            compile(code) {
+                this.reset();
+                this.startTime = performance.now();
+                
+                try {
+                    // Split into lines and remove comments
+                    const lines = code.split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line && !line.startsWith('//'));
+                    
+                    // Parse and execute each line
+                    for (let i = 0; i < lines.length; i++) {
+                        this.parseLine(lines[i], i);
+                    }
+                    
+                    this.endTime = performance.now();
+                    return {
+                        success: true,
+                        output: this.output.join('\n'),
+                        runtime: this.endTime - this.startTime
+                    };
+                } catch (error) {
+                    this.endTime = performance.now();
+                    return {
+                        success: false,
+                        output: `Error: ${error.message}`,
+                        runtime: this.endTime - this.startTime
+                    };
+                }
+            }
+            
+            parseLine(line, lineNum) {
+                // Print command
+                if (line.startsWith('print ')) {
+                    const content = line.substring(6);
+                    this.output.push(this.evaluateExpression(content));
+                    return;
+                }
+                
+                // Variable assignment
+                if (line.includes(' = ')) {
+                    const [varName, value] = line.split(' = ');
+                    this.variables.set(varName.trim(), this.evaluateExpression(value));
+                    return;
+                }
+                
+                // If statement
+                if (line.startsWith('if ')) {
+                    const condition = line.substring(3);
+                    return this.evaluateExpression(condition);
+                }
+                
+                // Loop
+                if (line.startsWith('repeat ')) {
+                    const [countStr, action] = line.substring(7).split(' do ');
+                    const count = parseInt(this.evaluateExpression(countStr));
+                    
+                    for (let i = 0; i < count; i++) {
+                        this.parseLine(action, lineNum);
+                    }
+                    return;
+                }
+                
+                // Function definition
+                if (line.startsWith('func ')) {
+                    const funcDef = line.substring(5);
+                    const funcName = funcDef.split('(')[0].trim();
+                    const funcBody = funcDef.split('{')[1].split('}')[0].trim();
+                    this.functions.set(funcName, funcBody);
+                    return;
+                }
+                
+                // Function call
+                if (line.includes('(') && line.includes(')')) {
+                    const funcName = line.split('(')[0].trim();
+                    if (this.functions.has(funcName)) {
+                        const funcBody = this.functions.get(funcName);
+                        // Execute function body
+                        const bodyLines = funcBody.split(';');
+                        for (const bodyLine of bodyLines) {
+                            if (bodyLine.trim()) {
+                                this.parseLine(bodyLine.trim(), lineNum);
+                            }
+                        }
+                        return;
+                    }
+                }
+                
+                // Direct value or unknown command
+                try {
+                    const value = this.evaluateExpression(line);
+                    if (value !== undefined) {
+                        this.output.push(value);
+                    }
+                } catch (e) {
+                    throw new Error(`Unknown command at line ${lineNum + 1}: ${line}`);
+                }
+            }
+            
+            evaluateExpression(expr) {
+                expr = expr.trim();
+                
+                // Check if it's a string literal
+                if ((expr.startsWith('"') && expr.endsWith('"')) || 
+                    (expr.startsWith("'") && expr.endsWith("'"))) {
+                    return expr.substring(1, expr.length - 1);
+                }
+                
+                // Check if it's a variable
+                if (this.variables.has(expr)) {
+                    return this.variables.get(expr);
+                }
+                
+                // Check if it's a number
+                if (!isNaN(expr)) {
+                    return parseFloat(expr);
+                }
+                
+                // Handle math operations
+                if (expr.includes('+')) {
+                    const [left, right] = expr.split('+').map(e => this.evaluateExpression(e.trim()));
+                    return left + right;
+                }
+                
+                if (expr.includes('-')) {
+                    const [left, right] = expr.split('-').map(e => this.evaluateExpression(e.trim()));
+                    return left - right;
+                }
+                
+                if (expr.includes('*')) {
+                    const [left, right] = expr.split('*').map(e => this.evaluateExpression(e.trim()));
+                    return left * right;
+                }
+                
+                if (expr.includes('/')) {
+                    const [left, right] = expr.split('/').map(e => this.evaluateExpression(e.trim()));
+                    return left / right;
+                }
+                
+                // Handle comparisons
+                if (expr.includes('==')) {
+                    const [left, right] = expr.split('==').map(e => this.evaluateExpression(e.trim()));
+                    return left == right;
+                }
+                
+                if (expr.includes('>')) {
+                    const [left, right] = expr.split('>').map(e => this.evaluateExpression(e.trim()));
+                    return left > right;
+                }
+                
+                if (expr.includes('<')) {
+                    const [left, right] = expr.split('<').map(e => this.evaluateExpression(e.trim()));
+                    return left < right;
+                }
+                
+                // Return the expression as is if we can't evaluate it
+                return expr;
+            }
+        }
+        
+        // UI functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const compiler = new GeoXCompiler();
+            const codeEditor = document.getElementById('code-editor');
+            const outputDisplay = document.getElementById('output-display');
+            const runButton = document.getElementById('btn-run');
+            const runtimeDisplay = document.getElementById('runtime');
+            const problemsButton = document.getElementById('btn-problems');
+            const problemsPanel = document.getElementById('problems-panel');
+            const openButton = document.getElementById('btn-open');
+            const saveButton = document.getElementById('btn-save');
+            const fileInput = document.getElementById('file-input');
+            
+            // Problems dictionary
+            const problems = {
+                hello: `// Hello World Program in GeoX
+// Print a greeting message
+
+print "Hello, GeoX World!"
+`,
+                variables: `// Variables and Math in GeoX
+// Define variables and perform calculations
+
+x = 10
+y = 5
+
+sum = x + y
+diff = x - y
+product = x * y
+quotient = x / y
+
+print "x = " + x
+print "y = " + y
+print "Sum: " + sum
+print "Difference: " + diff
+print "Product: " + product
+print "Quotient: " + quotient
+`,
+                loop: `// Loops in GeoX
+// Use repeat to execute code multiple times
+
+print "Counting from 1 to 5:"
+repeat 5 do print "Count: " + (1 + 1)
+
+total = 0
+repeat 10 do total = total + 1
+print "Sum of numbers 1 to 10: " + total
+`,
+                conditional: `// Conditional Logic in GeoX
+// Use if statements for decision making
+
+x = 10
+y = 20
+
+print "Testing conditions:"
+
+if x < y
+print "x is less than y"
+
+if x > y
+print "x is greater than y"
+
+if x == 10
+print "x equals 10"
+`,
+                function: `// Functions in GeoX
+// Define and call functions
+
+func greet() {
+  print "Hello from a function!";
+}
+
+func add(a, b) {
+  result = a + b;
+  print "Sum is: " + result;
+}
+
+greet()
+add(5, 3)
+`
+            };
+            
+            // Execute code
+            runButton.addEventListener('click', function() {
+                const code = codeEditor.value;
+                const result = compiler.compile(code);
+                
+                if (result.success) {
+                    outputDisplay.textContent = result.output;
+                } else {
+                    outputDisplay.textContent = result.output;
+                }
+                
+                runtimeDisplay.textContent = `Runtime: ${result.runtime.toFixed(2)}ms`;
+            });
+            
+            // Toggle problems panel
+            problemsButton.addEventListener('click', function() {
+                problemsPanel.classList.toggle('show');
+            });
+            
+            // Load problem examples
+            document.querySelectorAll('.problem-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const problemKey = this.getAttribute('data-problem');
+                    if (problems[problemKey]) {
+                        codeEditor.value = problems[problemKey];
+                    }
+                    problemsPanel.classList.remove('show');
+                });
+            });
+            
+            // Open file
+            openButton.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        codeEditor.value = e.target.result;
+                    };
+                    reader.readAsText(file);
+                }
+            });
+            
+            // Save file
+            saveButton.addEventListener('click', function() {
+                const code = codeEditor.value;
+                const blob = new Blob([code], {type: 'text/plain'});
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'program.gx';
+                a.click();
+            });
+            
+            // Keyboard shortcuts
+            codeEditor.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    saveButton.click();
+                }
+                
+                if (e.ctrlKey && e.key === 'o') {
+                    e.preventDefault();
+                    openButton.click();
+                }
+                
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    runButton.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

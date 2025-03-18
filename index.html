@@ -325,7 +325,7 @@
                     return;
                 }
                 
-                // Function definition
+                
                 if (line.startsWith('func ')) {
                     const funcDef = line.substring(5);
                     const funcName = funcDef.split('(')[0].trim();
@@ -334,7 +334,7 @@
                     return;
                 }
                 
-                // Function call
+                
                 if (line.includes('(') && line.includes(')')) {
                     const funcName = line.split('(')[0].trim();
                     if (this.functions.has(funcName)) {
@@ -350,7 +350,7 @@
                     }
                 }
                 
-                // Direct value or unknown command
+                
                 try {
                     const value = this.evaluateExpression(line);
                     if (value !== undefined) {
@@ -364,23 +364,23 @@
             evaluateExpression(expr) {
                 expr = expr.trim();
                 
-                // Check if it's a string literal
+                
                 if ((expr.startsWith('"') && expr.endsWith('"')) || 
                     (expr.startsWith("'") && expr.endsWith("'"))) {
                     return expr.substring(1, expr.length - 1);
                 }
                 
-                // Check if it's a variable
+                
                 if (this.variables.has(expr)) {
                     return this.variables.get(expr);
                 }
                 
-                // Check if it's a number
+                
                 if (!isNaN(expr)) {
                     return parseFloat(expr);
                 }
                 
-                // Handle math operations
+                
                 if (expr.includes('+')) {
                     const [left, right] = expr.split('+').map(e => this.evaluateExpression(e.trim()));
                     return left + right;
@@ -401,7 +401,7 @@
                     return left / right;
                 }
                 
-                // Handle comparisons
+                
                 if (expr.includes('==')) {
                     const [left, right] = expr.split('==').map(e => this.evaluateExpression(e.trim()));
                     return left == right;
@@ -417,12 +417,12 @@
                     return left < right;
                 }
                 
-                // Return the expression as is if we can't evaluate it
+                
                 return expr;
             }
         }
         
-        // UI functionality
+        
         document.addEventListener('DOMContentLoaded', function() {
             const compiler = new GeoXCompiler();
             const codeEditor = document.getElementById('code-editor');
@@ -435,7 +435,7 @@
             const saveButton = document.getElementById('btn-save');
             const fileInput = document.getElementById('file-input');
             
-            // Problems dictionary
+            
             const problems = {
                 hello: `// Hello World Program in GeoX
 // Print a greeting message
@@ -504,7 +504,7 @@ add(5, 3)
 `
             };
             
-            // Execute code
+            
             runButton.addEventListener('click', function() {
                 const code = codeEditor.value;
                 const result = compiler.compile(code);
